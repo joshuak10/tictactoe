@@ -7,13 +7,17 @@ class TicTacToe:
     
     def mark(self, i, j):
         if not (0<=i<=2 and 0<=j<=2):
-            raise ValueError("Outside of Board")
+            print("Outside of Bounds")
+            return
         if self._board[i][j] != " ":
-            raise ValueError("Board Position Occupied")
+            print("Occupied Slot")
+            return
         if self.winner() is not None:
-            raise ValueError("Game Completed")
+            print("Game Completed")
+            return
         if self.winner() == "Tie":
-            raise ValueError("Game Tied")
+            print("Tie Game")
+            return
         self._board[i][j] = self._player
         if self._player == "X":
             self._player = "O"
