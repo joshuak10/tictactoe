@@ -2,9 +2,11 @@ class TicTacToe:
 
     def __init__(self):
         self._board = [[" "] * 3 for j in range(3)]
+        self._availablespace = [0,1,2,3,4,5,6,7,8]
         self._player = "X"
         self._aiplayer = "O"
         self._currentturn = self._player
+        self._winner = ""
         self._state = True
         self._end = ""
         
@@ -21,7 +23,7 @@ class TicTacToe:
         y.strip()
         self.mark(int(x),int(y))
         
-    def mark(self, i, j):
+    def mark(self, i, j, a = None):
         if not (0<=i<=2 and 0<=j<=2):
             print("Outside of Bounds")
             return
@@ -29,12 +31,16 @@ class TicTacToe:
             print("Occupied Slot")
             return
         
-        self._board[i][j] = self._currentturn
+        if a is None:
+            self._board[i][j] = self._currentturn
+            self.updatespace(i,j)
 
-        if self._currentturn == self._player:
-            self._currentturn = self._aiplayer
+            if self._currentturn == self._player:
+                self._currentturn = self._aiplayer
+            else:
+                self._currentturn = self._player
         else:
-            self._currentturn = self._player
+            self._board[i][j] = a
             
     def iswin(self, mark):
         board = self._board
@@ -50,12 +56,8 @@ class TicTacToe:
 
 
     def checkstate(self):
-        if self._currentturn == self._player:
-            winner = self._aiplayer
-        else:
-            winner = self._player
         if self.checkwin():
-            print(f"Winner is {winner}!")
+            print(f"Winner is {self._winner}!")
             self._state = False
             self._end = "win"
             return self._end
@@ -71,6 +73,10 @@ class TicTacToe:
     def checkwin(self):
          for mark in "XO":
              if self.iswin(mark):
+                 if mark == "X":
+                     self._winner = self._player
+                 else:
+                     self._winner = self._aiplayer
                  return True
          return False
     def checktie(self):
@@ -81,7 +87,60 @@ class TicTacToe:
         rows = ['|'.join(self._board[r]) for r in range(3)]
         return '\n-----\n'.join(rows)
     
-    #  def minimax(board, depth, isMaximizingPlayer):
-    #     winner = 
+    def updatespace(self, i, j):
+        index = (i * 3) + (j%3)
+        self._availablespace.remove(index)
 
+
+    
+    def minimax(self, depth, isMaximizingPlayer):
+        winner = ""
+        if self.checkwin():
+            winner = self._winner
+        if winner == self._aiplayer:
+            return 1
+        if winner == self._player:
+            return -1
+        if self.checktie():
+            return 0
         
+        if isMaximizingPlayer:
+            bestscore = float("-inf")
+            for each in self._availablespace:
+                move_i = each//3
+                move_j = each%3
+                if self._board[move_i][move_j] != " ":
+                    continue
+                self.mark(move_i,move_j, self._aiplayer) 
+                score = self.minimax(depth+1, isMaximizingPlayer=False)
+                self._board[move_i][move_j] = " "
+                best_score = max(score, bestscore)
+            return best_score
+        else:
+            bestscore = float("inf")
+            for each in self._availablespace:
+                move_i = each//3
+                move_j = each%3
+                if self._board[move_i][move_j] != " ":
+                    continue
+                self.mark(move_i,move_j, self._player)
+                score = self.minimax(depth+1, isMaximizingPlayer=True)
+                self._board[move_i][move_j] = " "
+                best_score = min(score,bestscore)
+            return best_score
+        
+    def aimove(self):
+        best_score = float("-inf")
+        best_move = None
+        for each in self._availablespace:
+            move_i = each//3
+            move_j = each%3
+            if self._board[move_i][move_j] != " ":
+                continue
+            self.mark(move_i,move_j,self._aiplayer)
+            score = self.minimax(0,False)
+            self._board[move_i][move_j] = " "
+            if score>best_score:
+                best_score = score
+                best_move = (move_i, move_j) #dont forget indexes here
+        print(best_move)

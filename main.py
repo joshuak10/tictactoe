@@ -9,6 +9,7 @@ while game._state:
     #     print("tie game")
     #     break
     game.loop()
+    game.aimove()
     print(game)
     if game.checkstate() == "win" or game.checkstate == "tie":
         break
