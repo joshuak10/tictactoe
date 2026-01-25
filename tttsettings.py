@@ -56,7 +56,9 @@ class TicTacToe:
 
 
     def checkstate(self):
-        if self.checkwin():
+        winner = self.checkwin()
+        if winner:
+            self._winner = winner
             print(f"Winner is {self._winner}!")
             self._state = False
             self._end = "win"
@@ -73,12 +75,9 @@ class TicTacToe:
     def checkwin(self):
          for mark in "XO":
              if self.iswin(mark):
-                 if mark == "X":
-                     self._winner = self._player
-                 else:
-                     self._winner = self._aiplayer
-                 return True
-         return False
+                 return mark
+         return None
+    
     def checktie(self):
         if not any(" " in row for row in self._board):
             return True
@@ -94,9 +93,7 @@ class TicTacToe:
 
     
     def minimax(self, depth, isMaximizingPlayer):
-        winner = ""
-        if self.checkwin():
-            winner = self._winner
+        winner = self.checkwin()
         if winner == self._aiplayer:
             return 1
         if winner == self._player:
@@ -114,8 +111,8 @@ class TicTacToe:
                 self.mark(move_i,move_j, self._aiplayer) 
                 score = self.minimax(depth+1, isMaximizingPlayer=False)
                 self._board[move_i][move_j] = " "
-                best_score = max(score, bestscore)
-            return best_score
+                bestscore = max(score, bestscore)
+            return bestscore
         else:
             bestscore = float("inf")
             for each in self._availablespace:
@@ -126,8 +123,8 @@ class TicTacToe:
                 self.mark(move_i,move_j, self._player)
                 score = self.minimax(depth+1, isMaximizingPlayer=True)
                 self._board[move_i][move_j] = " "
-                best_score = min(score,bestscore)
-            return best_score
+                bestscore = min(score,bestscore)
+            return bestscore
         
     def aimove(self):
         best_score = float("-inf")
@@ -142,5 +139,7 @@ class TicTacToe:
             self._board[move_i][move_j] = " "
             if score>best_score:
                 best_score = score
-                best_move = (move_i, move_j) #dont forget indexes here
-        print(best_move)
+                best_move_i = move_i #dont forget indexes here
+                best_move_j = move_j #dont forget indexes here
+        print(f"AI chooses {best_move_i}, {best_move_j}")
+        self.mark(best_move_i,best_move_j)
